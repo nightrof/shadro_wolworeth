@@ -1,0 +1,44 @@
+code --install-extension formulahendry.auto-close-tag
+code --install-extension formulahendry.auto-rename-tag
+code --install-extension steoates.autoimport
+code --install-extension HookyQR.beautify
+code --install-extension Anjali.clipboard-history
+code --install-extension donjayamanne.githistory
+code --install-extension formulahendry.code-runner
+code --install-extension PeterJausovec.vscode-docker
+code --install-extension PKief.material-icon-theme
+code --install-extension christian-kohler.path-intellisense
+code --install-extension Zignd.html-css-class-completion
+code --install-extension leizongmin.node-module-intellisense
+code --install-extension vladmrnv.expresssnippet
+code --install-extension DavidAnson.vscode-markdownlint
+code --install-extension pnp.polacode
+code --install-extension Unity.unity-debug
+code --install-extension Tobiah.unity-tools
+code --install-extension kleber-swf.unity-code-snippets
+code --install-extension YclepticStudios.unity-snippets
+code --install-extension ms-vscode.csharp
+code --install-extension formulahendry.code-runner
+code --install-extension jchannon.csharpextensions
+code --install-extension quicktype.quicktype
+code --install-extension monovaldes.linter-codeclimate
+code --install-extension streetsidesoftware.code-spell-checker
+code --install-extension msjsdiag.debugger-for-chrome
+code --install-extension dracula-theme.theme-dracula
+code --install-extension eamodio.gitlens
+code --install-extension dbaeumer.jshint
+code --install-extension wayou.vscode-todo-highlight
+code --install-extension robertohuertasm.vscode-icons
+code --install-extension Fr43nk.seito-openfile
+code --install-extension humao.rest-client
+code --install-extension danwahlin.angular2-snippets
+code --install-extension qinjia.view-in-browser
+code --install-extension hnw.vscode-auto-open-markdown-preview
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension CoenraadS.bracket-pair-colorizer
+code --install-extension alefragnani.Bookmarks
+code --install-extension jrebocho.vscode-random
+code --install-extension bradgashler.htmltagwrap
+
+# https://blog.elmah.io/best-visual-studio-code-extensions/
+# https://stackify.com/top-visual-studio-code-extensions/
