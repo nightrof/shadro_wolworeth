@@ -70,3 +70,31 @@ Há 3 scripts básicos:
 
 #### Resultado
 ![bola](/prototipo/balls.png)
+
+### Multiplayer
+
+#### Packages Utilizados
+* [PUN 2 - FREE](https://assetstore.unity.com/packages/tools/network/pun-2-free-119922)
+* TextMeshPro (já incluso no Unity3d)
+
+#### Referência
+* [Unity Multiplayer Tutorial - Photon 2 Setup (Part 1)](https://www.youtube.com/watch?v=02P_mrszvzY)
+  * ###### Obs: aos 4:30 o Wizard do Pun abre automaticamente; Caso isso não aconteça, alt+p (ou Window -> Photon Unity Networking -> PUN Wizard) deve abrir (caso nao abra, reinicie o Unity)
+* [Unity Multiplayer Tutorial - Quick Start Matchmaking (Part 2)](https://www.youtube.com/watch?v=SNhWbHqFUbU)
+
+#### Descrição
+
+Todos os códigos relacionados à multiplayer/photon/network, foram tirados do [canal InfoGamer](https://www.youtube.com/channel/UCyoayn_uVt2I55ZCUuBVRcQ).
+
+Links para os dois artigos:
+- [Multiplayer Setup](http://www.infogamerhub.com/multiplayer-setup/)
+  * Conectar ao Photon
+- [Menu/Quickstart](http://www.infogamerhub.com/multiplayer-quick-start/)
+  * Entrar e/ou criar salas
+#### Resultado
+
+![botao start](/prototipo/Menu_Start.png)
+
+![botao cancelar](/prototipo/Menu_Cancel.png)
+
+![dentro do jogo](/prototipo/Inside_Game.png)

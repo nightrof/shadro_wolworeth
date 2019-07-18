@@ -12,7 +12,7 @@ public class CollisionHandler : MonoBehaviour
         //Check for a match with the specific tag on any GameObject that collides with your GameObject
         if (collision.gameObject.CompareTag("Player"))
         {
-            var object_speed = collision.gameObject.GetComponent<MoveBall>();
+            var object_speed = collision.gameObject.GetComponent<PlayerController>();
             var speed = object_speed.current_speed;
             life -= speed;
             string debug = gameObject.name + "=" + life + "; lost " + speed + "hitpoints.";

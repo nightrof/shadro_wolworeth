@@ -7,9 +7,10 @@ public class CameraController : MonoBehaviour {
 
     private Vector3 offset;
 
-    void Start ()
+    public void Start ()
     {
-        offset = transform.position - player.transform.position;
+        Debug.Log("entrou <<<<<<");
+        offset = new Vector3(-2, 35, -20);
     }
     
     void LateUpdate ()
