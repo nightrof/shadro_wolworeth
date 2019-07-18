@@ -50,17 +50,17 @@ A última bola viva, vence.
 #### Descrição
 
 Há 3 scripts básicos:
-* [PlayerController](/protitpo/Multiplayer Roll-a-Ball/Assets/Scripts/PlayerController.cs)
+* [PlayerController](https://github.com/nightrof/shadro_wolworeth/blob/master/prototipo/Multiplayer%20Roll-a-Ball/Assets/Scripts/PlayerController.cs)
     * ```
       Além de controlar os inputs (setas e WASD) para movimentar a bola,
       calcula a velocidade da mesma em Km/h
       ```
-* [CameraController](/protitpo/Multiplayer Roll-a-Ball/Assets/Scripts/PlayerController.cs)
+* [CameraController](https://github.com/nightrof/shadro_wolworeth/blob/master/prototipo/Multiplayer%20Roll-a-Ball/Assets/Scripts/CameraController.cs)
     * ```
       Garante que a câmera siga a bola
       ```
 
-* [CollisionHandler](/protitpo/Multiplayer Roll-a-Ball/Assets/Scripts/PlayerController.cs)
+* [CollisionHandler](https://github.com/nightrof/shadro_wolworeth/blob/master/prototipo/Multiplayer%20Roll-a-Ball/Assets/Scripts/CollisionHandler.cs)
     * ```
       Trata as colisões, ao colidir com outro Player, recebe X de dano
       (de acordo com a velocidade do objeto que veio a colidir)
