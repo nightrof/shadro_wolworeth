@@ -129,3 +129,5 @@ As rodadas (do joao) poderiam ser esses temas que o max propos
 | 42. jogo mais "dark" | 9 | | 10 |
 | 43. musicas celticas no fundo | 9 | | 9 |
 | 44. rocket league ou mario kart so que battle royale | 8 | | 3 |
+
+[Jogo (Guilherme)](./definicao_do_jogo_guilherme.md)
