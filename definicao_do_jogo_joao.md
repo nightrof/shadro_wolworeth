@@ -26,7 +26,7 @@
 ### Tela inicial
 ```
 
-Após isso, tela inicial (#03), podendo escolher o Modo História*,
+Menu inicial (#03), podendo escolher o Modo História*,
 ou, o Multiplayer*.
 Além disso, botão de ajuda, configurações e Loja*.
 ```
