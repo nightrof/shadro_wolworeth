@@ -21,9 +21,11 @@ public class KnightMovementController : MonoBehaviour
     int jumpHash = Animator.StringToHash("Base Layer.Jumping");
 
     bool running;
-
+    Camera cam;
     int isBackward = 0;
-
+    float shootForce = 20f;
+    public Transform arrowSpawnPos;
+    public GameObject arrowPrefab;
     // Start is called before the first frame update
     void Start () 
     {
@@ -35,8 +37,8 @@ public class KnightMovementController : MonoBehaviour
     {
         controller = GetComponent<CharacterController> ();
         anim = GetComponent<Animator> ();
-        var camera = Camera.allCameras[0];
-        camera.GetComponent<CameraController>().target = transform;
+        cam = Camera.allCameras[0];
+        cam.GetComponent<Camera>().GetComponent<CameraController>().target = transform;
     }
 
     void RandomSpawnPosition () 
@@ -157,9 +159,18 @@ public class KnightMovementController : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 Attacking();
+                Shot();
             }
         }
     }
+
+    void Shot()
+    {
+        GameObject go = Instantiate(arrowPrefab, arrowSpawnPos.position, Quaternion.identity);
+        Rigidbody rb = go.GetComponent<Rigidbody>();
+        rb.velocity = cam.transform.forward * shootForce;
+    }
+
     void Attacking()
     {
         StartCoroutine(AttackRoutine());
