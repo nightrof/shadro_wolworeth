@@ -15,10 +15,15 @@ public class KnightMovementController : MonoBehaviour
     Vector3 forward = new Vector3 (0,0,1);
     Vector3 backward = new Vector3 (0,0,-1);    
     Vector3 notMoving = Vector3.zero;
+
     CharacterController controller;
     Animator anim;
+    int jumpHash = Animator.StringToHash("Base Layer.Jumping");
+
     bool running;
+
     int isBackward = 0;
+
     // Start is called before the first frame update
     void Start () 
     {
@@ -31,7 +36,7 @@ public class KnightMovementController : MonoBehaviour
         controller = GetComponent<CharacterController> ();
         anim = GetComponent<Animator> ();
         var camera = Camera.allCameras[0];
-        camera.GetComponent<CameraController> ().target = transform;
+        camera.GetComponent<CameraController>().target = transform;
     }
 
     void RandomSpawnPosition () 
@@ -42,7 +47,16 @@ public class KnightMovementController : MonoBehaviour
         transform.position = new Vector3 (x, y, z);
         transform.rotation = Quaternion.identity;
     }
+    void CheckIfJumping ()
+    {
+        AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.nameHash == jumpHash && controller.isGrounded)
+        {
+            anim.SetInteger("condition", 0);
+            anim.SetBool("jumping", false);
+        }
 
+    }
     void Move()
     {
         if (running)
@@ -62,6 +76,11 @@ public class KnightMovementController : MonoBehaviour
     {
         Movement();
         GetInput();
+        CheckIfJumping();
+        //Death();
+/*         anim.SetInteger("condition", 8);
+        Destroy(gameObject, 3);
+ */    
     }
 
     void Movement()
@@ -105,23 +124,32 @@ public class KnightMovementController : MonoBehaviour
                     Move();
                 }
             }
-            if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S))
-            {
-                anim.SetInteger("condition", 0);
-                moveDir = notMoving;
-            }
+
             if (Input.GetButton("Jump"))
             {
-                anim.SetInteger("condition", 4);
+                anim.SetInteger("condition", 5);
+                moveDir.y = jumpSpeed;
+                anim.SetBool("jumping", true);
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S))
+        {
+            anim.SetInteger("condition", 0);
+            moveDir = notMoving;
+            if (anim.GetBool("jumping") == true) 
+            {
                 moveDir.y = jumpSpeed;
             }
         }
 
         rot += Input.GetAxis("Horizontal") * rotSpeed * Time.deltaTime;
         transform.eulerAngles = new Vector3(0, rot, 0);
+        
         moveDir.y -= gravity * Time.deltaTime;
         controller.Move(moveDir * Time.deltaTime);
     }
+    
     void GetInput()
     {
         if(controller.isGrounded)
