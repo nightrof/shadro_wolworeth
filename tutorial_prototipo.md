@@ -100,3 +100,6 @@ Links para os dois artigos:
 ![dentro do jogo](/prototipo/Inside_Game.png)
 
 https://www.youtube.com/watch?v=ayiXNHhUhQE
+https://www.youtube.com/watch?v=VCWIl8WWJF0
+https://www.youtube.com/watch?v=DEtZUeVY9qk
+https://www.youtube.com/watch?v=xenW67bXTgM

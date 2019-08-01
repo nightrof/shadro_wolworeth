@@ -1,10 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CollisionHandler : MonoBehaviour
 {
     public float life = 100;
+    Slider healthBar;
+    void Start()
+    {
+        healthBar = Camera.allCameras[0].GetComponentInChildren(typeof(Slider)) as Slider;
+        healthBar.maxValue = 100;
+        healthBar.value = 100;
+    }
 
     void OnCollisionEnter(Collision collision)
     {
@@ -13,7 +21,8 @@ public class CollisionHandler : MonoBehaviour
         if (collision.gameObject.CompareTag("Arrow"))
         {
             life -= 25;
-            string debug = gameObject.name + "=" + life + "; lost " + 20 + "hitpoints.";
+            healthBar.value = life;
+            string debug = gameObject.name + "=" + life + "; lost " + 25 + "hitpoints.";
             Debug.Log(debug);
             if (life <= 0) {
                 Destroy(gameObject);
