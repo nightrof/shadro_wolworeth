@@ -68,7 +68,7 @@ public class KnightMovementController : MonoBehaviour {
     void Start () {
         Debug.Log(Time.time);
         SetComponents ();
-        //RandomSpawnPosition ();
+        RandomSpawnPosition ();
     }
 
     /*
@@ -220,8 +220,9 @@ public class KnightMovementController : MonoBehaviour {
 
     void Shot () {
         GameObject go = Instantiate (arrowPrefab, arrowSpawnPos.position, Quaternion.identity);
-        go.transform.SetParent(transform);
+        //go.transform.SetParent(transform);
         Rigidbody rb = go.GetComponent<Rigidbody> ();
+        go.GetComponent<Arrow>().parentID = gameObject.GetInstanceID();
         rb.velocity = arrowSpawnPos.forward * shootForce;
     }
 

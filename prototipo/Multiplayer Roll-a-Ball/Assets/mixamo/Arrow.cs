@@ -13,7 +13,7 @@ public class Arrow : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        parentID = transform.parent.gameObject.GetInstanceID();
+        // parentID = transform.parent.gameObject.GetInstanceID();
         rb = GetComponent<Rigidbody>();
         lt = GetComponent<Light>();
         Rotate();
