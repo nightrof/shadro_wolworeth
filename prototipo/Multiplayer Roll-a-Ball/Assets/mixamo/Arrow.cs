@@ -5,6 +5,7 @@ using UnityEngine;
 public class Arrow : MonoBehaviour
 {
     Rigidbody rb;
+    Light lt;
     float lifeTimer = 2f;
     float timer;
     bool hitSomething = false;
@@ -14,13 +15,14 @@ public class Arrow : MonoBehaviour
     {
         parentID = transform.parent.gameObject.GetInstanceID();
         rb = GetComponent<Rigidbody>();
+        lt = GetComponent<Light>();
         Rotate();
-        Destroy(gameObject, lifeTimer);
+        //Destroy(gameObject, lifeTimer);
     }
 
     void Rotate()
     {
-        transform.rotation = Quaternion.LookRotation(rb.velocity);    
+        transform.rotation = Quaternion.LookRotation(rb.velocity);
     }
 
     void Update()
@@ -47,6 +49,7 @@ public class Arrow : MonoBehaviour
         {
             hitSomething = true;
             transform.parent = null;
+            Destroy(lt);
             Stick();
         }
         

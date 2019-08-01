@@ -8,12 +8,12 @@ public class KnightMovementController : MonoBehaviour {
 
     float verticalVelocity;
     const float gravity = -9.8f;
-    const float jumpForce = 13f;
+    const float jumpForce = 11f;
     const float gravityJump = 15f;
 
     float speed;
     const float walkSpeed = 8f;
-    const float runningSpeed = 20f;
+    const float runningSpeed = 12f;
     const float backwardSpeed = 6f;
 
     Vector3 moveDir = Vector3.zero;
@@ -222,7 +222,7 @@ public class KnightMovementController : MonoBehaviour {
         GameObject go = Instantiate (arrowPrefab, arrowSpawnPos.position, Quaternion.identity);
         go.transform.SetParent(transform);
         Rigidbody rb = go.GetComponent<Rigidbody> ();
-        rb.velocity = cam.transform.forward * shootForce;
+        rb.velocity = arrowSpawnPos.forward * shootForce;
     }
 
     IEnumerator AttackRoutine () {
