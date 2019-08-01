@@ -2,186 +2,223 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class KnightMovementController : MonoBehaviour 
-{
-    float speed = 4;
-    float rotSpeed = 180;
+public class KnightMovementController : MonoBehaviour {
     float rot = 0;
-    float gravity = 14;
-    float jumpSpeed = 10;
+    const float rotSpeed = 180;
+
+    float verticalVelocity;
+    const float gravity = -9.8f;
+    const float jumpForce = 13f;
+    const float gravityJump = 15f;
+
+    float speed;
+    const float walkSpeed = 8f;
+    const float runningSpeed = 20f;
+    const float backwardSpeed = 6f;
 
     Vector3 moveDir = Vector3.zero;
     Vector3 moving;
-    Vector3 forward = new Vector3 (0,0,1);
-    Vector3 backward = new Vector3 (0,0,-1);    
+    Vector3 forward = new Vector3 (0, 0, 1);
+    Vector3 backward = new Vector3 (0, 0, -1);
     Vector3 notMoving = Vector3.zero;
 
-    CharacterController controller;
+    CharacterController charController;
     Animator anim;
-    int jumpHash = Animator.StringToHash("Base Layer.Jumping");
+    int jumpHash = Animator.StringToHash ("Base Layer.Jumping");
 
     bool running;
+    bool isMoving;
     Camera cam;
     int isBackward = 0;
     float shootForce = 20f;
     public Transform arrowSpawnPos;
     public GameObject arrowPrefab;
-    // Start is called before the first frame update
-    void Start () 
-    {
-        SetComponents ();
-        //RandomSpawnPosition ();
-    }
 
-    void SetComponents () 
-    {
-        controller = GetComponent<CharacterController> ();
+    /*
+        seta os componentes necessários
+        charController = charController
+            p mover o personagem, checar se ta no chão etc
+        anim = animator
+            p poder manipular as animaçoes de acordo com a movimentaçao etc
+        cam = cameracontroller (script)
+            dessa forma, assim que o player é spawnado, ele detecta qual é a camera existente e assinala que é nele que a camera deve focar
+     */
+    void SetComponents () {
+        charController = GetComponent<CharacterController> ();
         anim = GetComponent<Animator> ();
         cam = Camera.allCameras[0];
-        cam.GetComponent<Camera>().GetComponent<CameraController>().target = transform;
+        cam.GetComponent<Camera> ().GetComponent<CameraController> ().target = transform;
     }
 
-    void RandomSpawnPosition () 
-    {
+    /*
+        faz o personagem nascer em algum aleatório válido no mapa
+     */
+    void RandomSpawnPosition () {
         var x = Random.Range (3, -40);
         var y = 15;
         var z = Random.Range (70, 40);
         transform.position = new Vector3 (x, y, z);
         transform.rotation = Quaternion.identity;
     }
-    void CheckIfJumping ()
-    {
-        AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
-        if (stateInfo.nameHash == jumpHash && controller.isGrounded)
-        {
-            anim.SetInteger("condition", 0);
-            anim.SetBool("jumping", false);
+
+    void Start () {
+        SetComponents ();
+        //RandomSpawnPosition ();
+    }
+
+    /*
+        checa se o personagem tá com a animação "jumping" e, ao mesmo tempo, está no chão
+        e, então, corrige a animação pra Idle, caso seja essa a situaçao
+     */
+    void CheckIfAnimationIsJumping () {
+        AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo (0);
+        if (stateInfo.nameHash == jumpHash && charController.isGrounded) {
+            anim.SetInteger ("condition", 0);
+            anim.SetBool ("jumping", false);
+        }
+    }
+
+    /*
+        seta a animação de corrida, caminhada e andar pra trás
+            flag "isBackward" é justamente isso
+                caso a animação seja de caminhar, isBackward = 0
+                caso a animação seja de andar p trás, isBackward = 3
+
+                obs:
+                    condition = 1 -> andar p frente
+                    condition = 4 -> andar p trás
+        além disso seta o vetor de moveDir (utilizado pelo charController p movimentar o personagem) com moving (que pode ter o valor "forward"(0,0,1) ou "backward"(0,0,-1))
+     */
+    void Move () {
+
+        if (running && isMoving) {
+            anim.SetInteger ("condition", 3);
+        } else if(isMoving){
+            anim.SetInteger ("condition", 1 + isBackward);
         }
 
-    }
-    void Move()
-    {
-        if (running)
-        {
-            anim.SetInteger("condition", 3);
-        }
-        else
-        {
-            anim.SetInteger("condition", 1+isBackward);
-        }
-        moveDir = moving;
         moveDir *= speed;
-        moveDir = transform.TransformDirection(moveDir);
+        moveDir.y = gravity;
+
+        moveDir = transform.TransformDirection (moveDir * Time.deltaTime);
+
+/*         moveDir = Vector3.ClampMagnitude (moveDir, speed);
+         */
     }
 
-    void Update () 
-    {
-        Movement();
-        GetInput();
-        CheckIfJumping();
+    void Update () {
+        Movement ();
+        CheckIfAttacking ();
+        CheckIfAnimationIsJumping ();
         //Death();
-/*         anim.SetInteger("condition", 8);
-        Destroy(gameObject, 3);
- */    
+        /*         anim.SetInteger("condition", 8);
+                Destroy(gameObject, 3);
+         */
     }
 
-    void Movement()
-    {
-        if (controller.isGrounded) 
+    void HandleRotation () {
+        if(charController.isGrounded)
         {
+            rot += Input.GetAxis ("Horizontal") * rotSpeed * Time.deltaTime;
+            transform.eulerAngles = new Vector3 (0, rot, 0);
+        }
+    }
 
-            if (Input.GetKey(KeyCode.LeftShift)) 
-            {
-                speed = 8f;
+    void HandleGroundMove () {
+        if (charController.isGrounded) {
+            anim.SetInteger ("condition", 0);
+            moveDir = notMoving;
+            isMoving = false;
+            speed = walkSpeed;
+            running = false;
+            if (Input.GetKey (KeyCode.LeftShift)) {
+                speed = runningSpeed;
                 running = true;
             }
-            else
-            {
-                speed = 4f;
-                running = false;
-            } 
 
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
-            {
-                
-                if (Input.GetKey(KeyCode.W))
-                {
+            if (Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.S)) {
+                if (Input.GetKey (KeyCode.W)) {
                     moving = forward;
                     isBackward = 0;
                 }
-                if (Input.GetKey(KeyCode.S))
-                {
-                    speed = 2f;
+                if (Input.GetKey (KeyCode.S)) {
                     moving = backward;
-                    running = false;
                     isBackward = 3;
+
+                    speed = backwardSpeed;
+                    running = false;
                 }
 
-                if (anim.GetBool("attacking") == true)
-                {
+                if (anim.GetBool ("attacking") == true) {
                     return;
-                } 
-                else if (anim.GetBool("attacking") == false)
-                {
-                    Move();
                 }
+
+                moveDir = moving;
+                isMoving = true;
             }
 
-            if (Input.GetButton("Jump"))
-            {
-                anim.SetInteger("condition", 5);
-                moveDir.y = jumpSpeed;
-                anim.SetBool("jumping", true);
+            if (Input.GetKeyUp (KeyCode.W) || Input.GetKeyUp (KeyCode.S)) {
+                anim.SetInteger ("condition", 0);
+                moveDir = notMoving;
+                isMoving = false;
             }
+            Move ();
         }
-
-        if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S))
-        {
-            anim.SetInteger("condition", 0);
-            moveDir = notMoving;
-            if (anim.GetBool("jumping") == true) 
-            {
-                moveDir.y = jumpSpeed;
-            }
-        }
-
-        rot += Input.GetAxis("Horizontal") * rotSpeed * Time.deltaTime;
-        transform.eulerAngles = new Vector3(0, rot, 0);
-        
-        moveDir.y -= gravity * Time.deltaTime;
-        controller.Move(moveDir * Time.deltaTime);
     }
-    
-    void GetInput()
-    {
-        if(controller.isGrounded)
-        {
-            if (Input.GetMouseButtonDown(0))
-            {
+
+    void HandleJump () {
+        // verticalVelocity = 0;
+        if (charController.isGrounded) {
+            verticalVelocity = -gravityJump * Time.deltaTime;
+            if (Input.GetKeyDown (KeyCode.Space)) {
+                anim.SetInteger ("condition", 5);
+                anim.SetBool ("jumping", true);
+                verticalVelocity = jumpForce;
+            }
+        } else {
+            verticalVelocity -= gravityJump * Time.deltaTime;;
+        }
+
+        moveDir.y = verticalVelocity * Time.deltaTime;
+    }
+
+    void MoveChar() {
+        charController.Move (moveDir);    
+    }
+    /*
+        controla toda a entrada de dados referente à locomoção do personagem
+     */
+    void Movement () {
+        HandleGroundMove();
+        HandleJump();
+        HandleRotation();
+        MoveChar();
+    }
+
+    void CheckIfAttacking () {
+        if (charController.isGrounded) {
+            if (Input.GetMouseButtonDown (0)) {
                 Attacking();
                 Shot();
             }
         }
     }
 
-    void Shot()
-    {
-        GameObject go = Instantiate(arrowPrefab, arrowSpawnPos.position, Quaternion.identity);
-        Rigidbody rb = go.GetComponent<Rigidbody>();
+    void Shot () {
+        GameObject go = Instantiate (arrowPrefab, arrowSpawnPos.position, Quaternion.identity);
+        Rigidbody rb = go.GetComponent<Rigidbody> ();
         rb.velocity = cam.transform.forward * shootForce;
     }
 
-    void Attacking()
-    {
-        StartCoroutine(AttackRoutine());
+    void Attacking () {
+        StartCoroutine (AttackRoutine ());
     }
 
-    IEnumerator AttackRoutine()
-    {
-        anim.SetBool("attacking", true);
-        anim.SetInteger("condition", 2);
-        yield return new WaitForSeconds(1);
-        anim.SetInteger("condition", 0);
-        anim.SetBool("attacking", false);
+    IEnumerator AttackRoutine () {
+        anim.SetBool ("attacking", true);
+        anim.SetInteger ("condition", 2);
+        yield return new WaitForSeconds (1);
+        anim.SetInteger ("condition", 0);
+        anim.SetBool ("attacking", false);
     }
 }
