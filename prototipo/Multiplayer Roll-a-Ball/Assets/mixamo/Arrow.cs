@@ -8,10 +8,11 @@ public class Arrow : MonoBehaviour
     float lifeTimer = 2f;
     float timer;
     bool hitSomething = false;
-
+    public int parentID;
     // Start is called before the first frame update
     void Start()
     {
+        parentID = transform.parent.gameObject.GetInstanceID();
         rb = GetComponent<Rigidbody>();
         Rotate();
         Destroy(gameObject, lifeTimer);
@@ -39,7 +40,10 @@ public class Arrow : MonoBehaviour
     
     void OnCollisionEnter(Collision col)
     {
-        if(col.gameObject.CompareTag("Arrow"))
+        
+        int colID = col.gameObject.GetInstanceID();
+        Debug.Log("o pai {" + parentID + "} o colisor {"+ colID + "}");
+        if(!col.gameObject.CompareTag("Arrow") && colID != parentID)
         {
             hitSomething = true;
             Stick();

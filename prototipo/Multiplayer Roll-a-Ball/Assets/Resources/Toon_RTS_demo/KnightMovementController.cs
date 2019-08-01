@@ -206,6 +206,7 @@ public class KnightMovementController : MonoBehaviour {
 
     void Shot () {
         GameObject go = Instantiate (arrowPrefab, arrowSpawnPos.position, Quaternion.identity);
+        go.transform.SetParent(transform);
         Rigidbody rb = go.GetComponent<Rigidbody> ();
         rb.velocity = cam.transform.forward * shootForce;
     }

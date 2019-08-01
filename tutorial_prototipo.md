@@ -103,3 +103,5 @@ https://www.youtube.com/watch?v=ayiXNHhUhQE
 https://www.youtube.com/watch?v=VCWIl8WWJF0
 https://www.youtube.com/watch?v=DEtZUeVY9qk
 https://www.youtube.com/watch?v=xenW67bXTgM
+https://gamedev.stackexchange.com/questions/144956/jump-script-component-for-character-controller
+https://answers.unity.com/questions/373508/footsteps-script-for-running-and-walking.html
