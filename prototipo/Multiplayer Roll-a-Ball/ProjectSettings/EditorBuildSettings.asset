@@ -9,6 +9,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
-    path: Assets/Scenes/main.unity
-    guid: 181fb9b54d0ef139dbda25c039c205d1
+    path: Assets/Scenes/WorldSpaceTrees-Demo.unity
+    guid: 2dcce9d9479734a40b1bf360c6b1b91b
   m_configObjects: {}
