@@ -46,6 +46,7 @@ public class Arrow : MonoBehaviour
         if(!col.gameObject.CompareTag("Arrow") && colID != parentID)
         {
             hitSomething = true;
+            transform.parent = null;
             Stick();
         }
         

@@ -34,6 +34,10 @@ public class KnightMovementController : MonoBehaviour {
     public Transform arrowSpawnPos;
     public GameObject arrowPrefab;
 
+    float lastJump = 0f;
+    float nextAttack = 0f;
+    float attackDelay = 1.3f;
+
     /*
         seta os componentes necessários
         charController = charController
@@ -62,6 +66,7 @@ public class KnightMovementController : MonoBehaviour {
     }
 
     void Start () {
+        Debug.Log(Time.time);
         SetComponents ();
         //RandomSpawnPosition ();
     }
@@ -72,7 +77,8 @@ public class KnightMovementController : MonoBehaviour {
      */
     void CheckIfAnimationIsJumping () {
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo (0);
-        if (stateInfo.nameHash == jumpHash && charController.isGrounded) {
+        var currentTime = Time.time;
+        if (stateInfo.nameHash == jumpHash && (lastJump + 1.25f) <= currentTime) {
             anim.SetInteger ("condition", 0);
             anim.SetBool ("jumping", false);
         }
@@ -126,8 +132,8 @@ public class KnightMovementController : MonoBehaviour {
 
     void HandleGroundMove () {
         if (charController.isGrounded) {
-            anim.SetInteger ("condition", 0);
-            moveDir = notMoving;
+/*             anim.SetInteger ("condition", 0);
+            moveDir = notMoving; */
             isMoving = false;
             speed = walkSpeed;
             running = false;
@@ -174,6 +180,8 @@ public class KnightMovementController : MonoBehaviour {
                 anim.SetInteger ("condition", 5);
                 anim.SetBool ("jumping", true);
                 verticalVelocity = jumpForce;
+                lastJump = Time.time;
+                Debug.Log(Time.time);
             }
         } else {
             verticalVelocity -= gravityJump * Time.deltaTime;;
@@ -197,11 +205,17 @@ public class KnightMovementController : MonoBehaviour {
 
     void CheckIfAttacking () {
         if (charController.isGrounded) {
-            if (Input.GetMouseButtonDown (0)) {
+            if (Input.GetMouseButtonDown (0) && Time.time > nextAttack) {
+                nextAttack = Time.time + attackDelay;
                 Attacking();
-                Shot();
             }
         }
+    }
+
+
+    void Attacking () {
+        StartCoroutine (AttackRoutine ());
+        Shot();
     }
 
     void Shot () {
@@ -209,10 +223,6 @@ public class KnightMovementController : MonoBehaviour {
         go.transform.SetParent(transform);
         Rigidbody rb = go.GetComponent<Rigidbody> ();
         rb.velocity = cam.transform.forward * shootForce;
-    }
-
-    void Attacking () {
-        StartCoroutine (AttackRoutine ());
     }
 
     IEnumerator AttackRoutine () {
