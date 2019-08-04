@@ -3,82 +3,154 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-    [HideInInspector]
-    public float speed;
-    [HideInInspector]
-    public float jumpSpeed;
-    [HideInInspector]
-    public float gravity;
-    [HideInInspector]
-    public float rotateSpeed;
-    [HideInInspector]
-    public float current_speed;
-
-
-    private Vector3 moveDirection;
-    private Vector3 lastPosition;
-    private CharacterController controller;
-
-    private void Awake()
+    [System.Serializable]
+    public class MoveSettings
     {
-        Camera.main.GetComponent<CameraController>().target = transform;
-        controller = GetComponent<CharacterController>();
-    }
-    
-    void RandomSpawnPosition(){
-        var x = Random.Range(3, -40);
-        var y = 15;
-        var z = Random.Range(70, 40);
-        transform.position = new Vector3(x, y, z);
-        transform.rotation = Quaternion.identity;
-        Debug.Log("Entrou" + "x="+x +";y="+ y +";z="+ z);
-        Debug.Log(transform.position);
+        public float forwardVel = 12;
+        public float rotateVel = 100;        
+        public float jumpVel = 25;
+        // tolerancia p considerar como no chão
+        public float distToGrounded = 0.8f;
+        // especificar objetos cujo os quais possibilitam pular ou nao
+        public LayerMask ground;
     }
 
-    void InitialValues(){
-        speed = 18.0F;
-        current_speed = 0;
-
-        jumpSpeed = 30.0F;
-        gravity = 520.0F;
-        rotateSpeed = 5.0F;
-
-        moveDirection = Vector3.zero;
-        
-        lastPosition = Vector3.zero;
-    }
-
-    void Start()
+    [System.Serializable]
+    public class PhysSettings
     {
-        InitialValues();
-        RandomSpawnPosition();
+        public float downAccel = 0.75f;
     }
-    
+
+    [System.Serializable]
+    public class InputSettings
+    {
+        public float inputDelay = 0.1f;
+        public string FORWARD_AXIS = "Vertical";
+        public string TURN_AXIS = "Horizontal";
+        public string JUMP_AXIS = "Jump";
+    }
+
+    public MoveSettings moveSetting = new MoveSettings();
+    public PhysSettings physSetting = new PhysSettings();
+    public InputSettings inputSetting = new InputSettings();    
+
+    Vector3 velocity = Vector3.zero;
+    Quaternion targetRotation;
+    Rigidbody rb;
+    float forwardInput, turnInput, jumpInput;
+
+    public Quaternion TargetRotation
+    {
+        get { return targetRotation; }
+    }
+
+    bool Grounded()
+    {
+        return Physics.Raycast(transform.position,
+                               Vector3.down,
+                               moveSetting.distToGrounded,
+                               moveSetting.ground);
+    }
+    /// <summary>
+    /// Start is called on the frame when a script is enabled just before
+    /// any of the Update methods is called the first time.
+    /// </summary>
+    void Awake()
+    {
+        targetRotation = transform.rotation;
+        if(GetComponent<Rigidbody>()){
+            rb = GetComponent<Rigidbody>();
+        }
+        else
+        {
+            Debug.LogError("no rigidbody!");
+        }
+
+        jumpInput = forwardInput = turnInput = 0;
+
+        Camera cam = Camera.allCameras[0];
+        cam.GetComponent<Camera> ().GetComponent<CameraController> ().target = transform;
+
+    }
+
+    /// <summary>
+    /// Update is called every frame, if the MonoBehaviour is enabled.
+    /// </summary>
     void Update()
     {
-/*         if (controller.isGrounded)
-        {
- */
-        moveDirection = new Vector3(0f, 0, Input.GetAxis("Vertical"));
-        moveDirection = transform.TransformDirection(moveDirection);
-        moveDirection *= speed;
-        if (Input.GetButton("Jump"))
-            moveDirection.y = jumpSpeed;
-/*         moveDirection = transform.TransformDirection(moveDirection);
-        moveDirection *= speed;
-
- */
-/*         moveDirection.y -= gravity * Time.deltaTime;
- */        
-        moveDirection.y -= gravity * Time.deltaTime;
-        controller.Move(moveDirection * Time.deltaTime);
-
-        //Rotate Player
-        transform.Rotate(0, Input.GetAxis("Horizontal")*rotateSpeed, 0);
-/* 
-        current_speed = (((transform.position - lastPosition).magnitude) / Time.deltaTime);
-        lastPosition = transform.position;
- */
+        GetInput();
+        Turn();
     }
 
+    /// <summary>
+    /// This function is called every fixed framerate frame, if the MonoBehaviour is enabled.
+    /// </summary>
+    void FixedUpdate()
+    {
+        Run();
+        Jump();        
+        rb.velocity = transform.TransformDirection(velocity);
+    }
+
+    void GetInput()
+    {
+        forwardInput = Input.GetAxis(inputSetting.FORWARD_AXIS);
+        turnInput = Input.GetAxis(inputSetting.TURN_AXIS);
+        jumpInput = Input.GetAxisRaw(inputSetting.JUMP_AXIS); // (-1 ou 1)
+        
+    }
+
+    bool CheckDelay (float input) {
+        if (Mathf.Abs(input) > inputSetting.inputDelay)
+        {
+            return true;
+        } 
+        else
+        {
+            return false;
+        }
+    }
+
+    void Run ()
+    {
+        if (CheckDelay(forwardInput))
+        {
+            //move
+            velocity.z = moveSetting.forwardVel * forwardInput;
+        }
+        else
+        {
+            velocity.z = 0;
+        }
+    }
+
+    void Jump ()
+    {
+        if (jumpInput > 0 && Grounded())
+        {
+            //jumping
+            velocity.y = moveSetting.jumpVel;
+        }
+        else if (jumpInput == 0 && Grounded())
+        {
+            //grounded
+            velocity.y = 0;
+        }
+        else
+        {
+            //falling
+            velocity.y -= physSetting.downAccel;
+        }
+    }
+
+    void Turn ()
+    {
+        if (CheckDelay(turnInput))
+        {
+            targetRotation *= Quaternion.AngleAxis(moveSetting.rotateVel * turnInput * Time.deltaTime,
+                                                   Vector3.up);
+
+        }
+        transform.rotation = targetRotation; 
+    }
 }

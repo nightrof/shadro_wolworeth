@@ -4466,7 +4466,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &879249965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5074,6 +5074,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
+  position:
+    targetPosOffset: {x: 0, y: 3.4, z: 0}
+    lookSmooth: 100
+    distanceFromTarget: -8
+    zoomSmooth: 100
+    maxZoom: -2
+    minZoom: -15
+  orbit:
+    xRotation: -20
+    yRotation: -180
+    maxXRotation: 25
+    minXRotation: -85
+    vOrbitSmooth: 150
+    hOrbitSmooth: 150
+  input:
+    ORBIT_HORIZONTAL_SNAP: OrbitHorizontalSnap
+    ORBIT_HORIZONTAL: OrbitHorizontal
+    ORBIT_VERTICAL: OrbitVertical
+    ZOOM: Mouse ScrollWheel
 --- !u!81 &973948295
 AudioListener:
   m_ObjectHideFlags: 0
@@ -5133,7 +5152,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 973948293}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.7481248, y: 0.91033137, z: -4.487673}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 113485198}
@@ -8508,13 +8527,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1744285931}
-  - component: {fileID: 1744285930}
-  - component: {fileID: 1744285929}
   - component: {fileID: 1744285928}
   - component: {fileID: 1744285927}
-  - component: {fileID: 1744285932}
   - component: {fileID: 1744285933}
-  - component: {fileID: 1744285934}
+  - component: {fileID: 1744285929}
+  - component: {fileID: 1744285930}
   m_Layer: 0
   m_Name: ToonRTS_demo_Knight(Clone)
   m_TagString: Arrow
@@ -8531,7 +8548,7 @@ CharacterController:
   m_GameObject: {fileID: 1744285926}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Height: 1.5
   m_Radius: 0.5
@@ -8551,10 +8568,10 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!114 &1744285929
 MonoBehaviour:
@@ -8563,32 +8580,40 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1744285926}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 462cfa78e3cfd71328378134154c8aee, type: 3}
+  m_Script: {fileID: 11500000, guid: 604a586a6943012639c11a2c0113b7ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  arrowSpawnPos: {fileID: 0}
-  arrowPrefab: {fileID: 0}
---- !u!95 &1744285930
-Animator:
-  serializedVersion: 3
+  moveSetting:
+    forwardVel: 12
+    rotateVel: 100
+    jumpVel: 25
+    distToGrounded: 0.1
+    ground:
+      serializedVersion: 2
+      m_Bits: 4294967295
+  physSetting:
+    downAccel: 0.75
+  inputSetting:
+    inputDelay: 0.1
+    FORWARD_AXIS: Vertical
+    TURN_AXIS: Horizontal
+    JUMP_AXIS: Jump
+--- !u!64 &1744285930
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1744285926}
-  m_Enabled: 0
-  m_Avatar: {fileID: 9000000, guid: ba24e610e0a338545b447ff44a3cf1cc, type: 3}
-  m_Controller: {fileID: 9100000, guid: 881601d06f81f73f6bbaac908d280f8f, type: 2}
-  m_CullingMode: 2
-  m_UpdateMode: 1
-  m_ApplyRootMotion: 1
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 0
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_Mesh: {fileID: 0}
 --- !u!4 &1744285931
 Transform:
   m_ObjectHideFlags: 0
@@ -8597,7 +8622,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1744285926}
   m_LocalRotation: {x: 0, y: 0.0000005637348, z: 0, w: 1}
-  m_LocalPosition: {x: -0.75, y: 0, z: 5.37}
+  m_LocalPosition: {x: -0.75, y: 0.07, z: 5.37}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2001259872}
@@ -8605,21 +8630,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!111 &1744285932
-Animation:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1744285926}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Animation: {fileID: 0}
-  m_Animations: []
-  m_WrapMode: 0
-  m_PlayAutomatically: 1
-  m_AnimatePhysics: 0
-  m_CullingType: 0
 --- !u!114 &1744285933
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8632,19 +8642,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ee91d56ec73dea84a59a72365b489a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!65 &1744285934
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1744285926}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.56, y: 3.63, z: 1.59}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &1752923426
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9858,16 +9855,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -5327680592222310268, guid: 43d5eeb535e3b43b4bd2b87ac7b65365,
-        type: 3}
-      propertyPath: viewIdField
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -5327680592222310268, guid: 43d5eeb535e3b43b4bd2b87ac7b65365,
-        type: 3}
-      propertyPath: InstantiationId
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2294934502937130244, guid: 43d5eeb535e3b43b4bd2b87ac7b65365,
         type: 3}
       propertyPath: m_Name
@@ -9877,6 +9864,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5327680592222310268, guid: 43d5eeb535e3b43b4bd2b87ac7b65365,
+        type: 3}
+      propertyPath: viewIdField
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -5327680592222310268, guid: 43d5eeb535e3b43b4bd2b87ac7b65365,
+        type: 3}
+      propertyPath: InstantiationId
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2991066479359428375, guid: 43d5eeb535e3b43b4bd2b87ac7b65365,
         type: 3}

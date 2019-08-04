@@ -10,7 +10,8 @@ public class PlayerMovementController : MonoBehaviour
 
     float rot = 0;
     const float rotSpeed = 180;
-
+    Quaternion targetRotation;
+    
     float verticalVelocity;
     const float gravity = -9.8f;
     const float jumpForce = 11f;
@@ -20,6 +21,7 @@ public class PlayerMovementController : MonoBehaviour
     const float walkSpeed = 8f;
     const float runningSpeed = 12f;
     const float backwardSpeed = 6f;
+    float forwardInput, turnInput;
 
     Vector3 moveDir = Vector3.zero;
     Vector3 moving;
@@ -30,6 +32,11 @@ public class PlayerMovementController : MonoBehaviour
     bool isMoving;
     int isBackward = 0;
     float lastJump = 0f;
+
+    public Quaternion TargetRotation
+    {
+        get { return targetRotation; }
+    }
 
     /*
         seta os componentes necessários
@@ -104,7 +111,7 @@ public class PlayerMovementController : MonoBehaviour
         HandleRotation();
         MoveChar();
     }
-    
+
     void HandleRotation () {
         if(charController.isGrounded)
         {
