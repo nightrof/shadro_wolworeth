@@ -8,21 +8,30 @@ public class CameraController : MonoBehaviour {
     [System.Serializable]
     public class PositionSettings
     {
-        public Vector3 targetPosOffset = new Vector3(0, 3.4f, 0);
+        public Vector3 targetPosOffset = new Vector3(0, 1.6f, 0);
         public float lookSmooth = 100f;
-        public float distanceFromTarget = -8;
+        public float distanceFromTarget = -3.5f;
         public float zoomSmooth = 100;
         public float maxZoom = -2;
         public float minZoom = -15;
+        public bool smoothFollow = true;
+        public float smoothTime = 0.05f;
+
+        [HideInInspector]
+        public float newDistance = -8;
+        [HideInInspector]
+        public float adjustmentDistance = -8;
     }
 
     [System.Serializable]
     public class OrbitSettings
     {
-        public float xRotation = -20;
+        public float xRotation = -15;
         public float yRotation = -180;
         public float maxXRotation = 25;
-        public float minXRotation = -85;
+        public float minXRotation = -40;
+        public float maxYRotation = 230;
+        public float minYRotation = 130;
         public float vOrbitSmooth = 150; 
         public float hOrbitSmooth = 150; 
     }
@@ -30,21 +39,37 @@ public class CameraController : MonoBehaviour {
     [System.Serializable]
     public class InputSettings
     {
+        public string MOUSE_ORBIT = "MouseOrbit";
+        public string MOUSE_ORBIT_VERTICAL = "MouseOrbitVertical";
         public string ORBIT_HORIZONTAL_SNAP = "OrbitHorizontalSnap";
         public string ORBIT_HORIZONTAL = "OrbitHorizontal";
         public string ORBIT_VERTICAL = "OrbitVertical";
         public string ZOOM = "Mouse ScrollWheel";
     }
+
+    [System.Serializable]
+    public class DebugSettings
+    {
+        public bool drawDesiredCollisionLines = true;
+        public bool drawAdjustedCOllisionLines = true;
+    }
     
     public PositionSettings position = new PositionSettings();
     public OrbitSettings orbit = new OrbitSettings();
     public InputSettings input = new InputSettings();
+    public DebugSettings debug = new DebugSettings();
+    public CameraCollisionController.CollisionHandler collision;
 
     Vector3 targetPos = Vector3.zero;
     Vector3 destination = Vector3.zero;
+    Vector3 adjustedDestination = Vector3.zero;
+    Vector3 camVel = Vector3.zero;
+    Vector3 previousMousePos = Vector3.zero;
+    Vector3 currentMousePos = Vector3.zero;
+
     PlayerController _playerController;
 
-    float vOrbitInput, hOrbitInput, zoomInput, hOrbitSnapInput;
+    float vOrbitInput, hOrbitInput, zoomInput, hOrbitSnapInput, mouseOrbitInput, vMouseOrbitInput;
 
     /// <summary>
     /// Start is called on the frame when a script is enabled just before
@@ -53,7 +78,33 @@ public class CameraController : MonoBehaviour {
     void Start()
     {
         SetCameraTarget(target);
+        vOrbitInput = hOrbitInput = zoomInput = hOrbitSnapInput = mouseOrbitInput = vMouseOrbitInput = 0;
+        SetCollisionHandler();
         MoveToTarget();
+        collision.Initialize(transform.GetComponent<Camera>());
+        UpdateCameraClipPoints();
+        previousMousePos = currentMousePos = Input.mousePosition;
+    }
+
+    void SetCollisionHandler()
+    {
+        if (transform.GetComponent<CameraCollisionController>())
+        {
+            var cameraCollisionScript = transform.GetComponent<CameraCollisionController>();
+            collision = cameraCollisionScript.collision;
+            cameraCollisionScript.target = target;
+        }
+        else
+        {
+            Debug.LogError("No camera collision handler attached to camera");
+        }
+    }
+
+    void UpdateCameraClipPoints()
+    {
+        collision.UpdateCameraClipPoints(transform.position, transform.rotation, ref collision.adjustedCameraClipPoints);
+        collision.UpdateCameraClipPoints(destination, transform.rotation, ref collision.desiredCameraClipPoints);
+
     }
 
     void SetCameraTarget(Transform t)
@@ -78,29 +129,112 @@ public class CameraController : MonoBehaviour {
     }
 
     /// <summary>
-    /// LateUpdate is called every frame, if the Behaviour is enabled.
-    /// It is called after all Update functions have been called.
+    /// This function is called every fixed framerate frame, if the MonoBehaviour is enabled.
     /// </summary>
-    void LateUpdate()
+    void FixedUpdate()
     {
         // Moving
         MoveToTarget();
         // Rotating
-        LookAtTarget();
+        LookAtTarget();    
+        // Orbiting (via input)
+        OrbitTarget();
+        MouseOrbitTarget();
+
+        UpdateCameraClipPoints();
+
+        DrawDebugLines();
+
+        CheckIfColliding();
+        UpdateAdjustmentDistance();
     }
 
+    // using raycasts
+    void CheckIfColliding ()
+    {
+        collision.CheckColliding(targetPos);
+    }
+    
+    // whenever the camera collides, it'll start to use the adjustmentDistance
+    void UpdateAdjustmentDistance()
+    {
+        position.adjustmentDistance = collision.GetAdjustedDistanceWithRayFrom(targetPos);
+
+    }
+    
+    // draw debug lines to clip points
+    void DrawDebugLines()
+    {
+        for (int i = 0; i < 5; ++i)
+        {
+            if (debug.drawDesiredCollisionLines)
+            {
+                Debug.DrawLine(targetPos, collision.desiredCameraClipPoints[i], Color.white);
+            }
+            else
+            {
+                // nothing to do here
+            }
+
+            if (debug.drawAdjustedCOllisionLines)
+            {
+                Debug.DrawLine(targetPos, collision.adjustedCameraClipPoints[i], Color.green);
+            }
+            else
+            {
+                // nothing to do here
+            }
+
+        }
+    }
+
+    void MouseOrbitTarget()
+    {
+        if (mouseOrbitInput != 0)
+        {
+            //getting the camera to orbit around our character
+            orbit.xRotation += vMouseOrbitInput * orbit.vOrbitSmooth * Time.deltaTime;
+            orbit.yRotation += mouseOrbitInput * orbit.hOrbitSmooth * Time.deltaTime;
+        }
+    }
+    
     void MoveToTarget()
     {
-        targetPos = target.position + position.targetPosOffset;
+//        targetPos = target.position + position.targetPosOffset;
+        targetPos = target.position + Vector3.up * position.targetPosOffset.y + Vector3.forward * position.targetPosOffset.z + transform.TransformDirection(Vector3.right * position.targetPosOffset.x);
         destination = Quaternion.Euler(orbit.xRotation, orbit.yRotation + target.eulerAngles.y, 0) * -Vector3.forward * position.distanceFromTarget
         ;
         destination += targetPos;
         transform.position = destination;
+
+        if (collision.colliding)
+        {
+            adjustedDestination = Quaternion.Euler(orbit.xRotation, orbit.yRotation + target.eulerAngles.y, 0) * Vector3.forward * position.adjustmentDistance;
+            adjustedDestination += targetPos;
+
+            MoveTorwardTo(adjustedDestination);
+        }
+        else
+        {
+            MoveTorwardTo(destination);
+        }
+    }
+
+    void MoveTorwardTo(Vector3 dest)
+    {
+        if (position.smoothFollow)
+        {
+            // use smooth damp function
+            transform.position = Vector3.SmoothDamp(transform.position, dest, ref camVel, position.smoothTime);
+        }
+        else
+        {
+            transform.position = dest;
+        }            
     }
 
     void Update() {
         GetInput();
-        OrbitTarget();
         ZoomInOnTarget();    
     }
 
@@ -108,7 +242,7 @@ public class CameraController : MonoBehaviour {
     {
         vOrbitInput = Input.GetAxisRaw(input.ORBIT_VERTICAL);
         hOrbitInput = Input.GetAxisRaw(input.ORBIT_HORIZONTAL);
-        hOrbitSnapInput = Input.GetAxisRaw("meudeusdoceu");
+        hOrbitSnapInput = Input.GetAxisRaw(input.ORBIT_HORIZONTAL_SNAP);
         zoomInput = Input.GetAxisRaw(input.ZOOM);
     }
 
@@ -129,6 +263,14 @@ public class CameraController : MonoBehaviour {
         if (orbit.xRotation < orbit.minXRotation)
         {
             orbit.xRotation = orbit.minXRotation;
+        }
+        if (orbit.yRotation > orbit.maxYRotation)
+        {
+            orbit.yRotation = orbit.maxYRotation;
+        }
+        if (orbit.yRotation < orbit.minYRotation)
+        {
+            orbit.yRotation = orbit.minYRotation;
         }
 
     }
