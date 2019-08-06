@@ -3,6 +3,7 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
+    public Transform arms;
     [System.Serializable]
     public class MoveSettings
     {
@@ -13,6 +14,8 @@ public class PlayerController : MonoBehaviour
         public float distToGrounded = 0.8f;
         // especificar objetos cujo os quais possibilitam pular ou nao
         public LayerMask ground;
+        public float mouseSensitivity = 3;
+        public float smoothRot = 100f;
     }
 
     [System.Serializable]
@@ -26,7 +29,7 @@ public class PlayerController : MonoBehaviour
     {
         public float inputDelay = 0.1f;
         public string FORWARD_AXIS = "Vertical";
-        public string TURN_AXIS = "Horizontal";
+        public string TURN_SIDEWAYS = "Horizontal";
         public string JUMP_AXIS = "Jump";
     }
 
@@ -37,13 +40,8 @@ public class PlayerController : MonoBehaviour
     Vector3 velocity = Vector3.zero;
     Quaternion targetRotation;
     Rigidbody rb;
-    float forwardInput, turnInput, jumpInput;
-
-    public Quaternion TargetRotation
-    {
-        get { return targetRotation; }
-    }
-
+    float forwardInput, sidewaysInput, jumpInput, mouseX, mouseY, lockInput;
+    Camera cam;
     bool Grounded()
     {
         return Physics.Raycast(transform.position,
@@ -66,40 +64,54 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("no rigidbody!");
         }
 
-        jumpInput = forwardInput = turnInput = 0;
+        mouseX = mouseY = jumpInput = forwardInput = sidewaysInput = lockInput = 0;
 
-        Camera cam = Camera.allCameras[0];
-        cam.GetComponent<Camera> ().GetComponent<CameraController> ().target = transform;
-
+        cam = Camera.allCameras[0];
+        cam.GetComponent<Camera> ().GetComponent<CameraController>().target = arms.transform;
     }
 
-    /// <summary>
+/*     /// <summary>
     /// Update is called every frame, if the MonoBehaviour is enabled.
     /// </summary>
     void Update()
     {
-        GetInput();
-        Turn();
-    }
+    } */
 
     /// <summary>
     /// This function is called every fixed framerate frame, if the MonoBehaviour is enabled.
     /// </summary>
-    void FixedUpdate()
+    void Update()
     {
+        GetInput();
+        CursorState();
         Run();
-        Jump();        
+        Jump();
+        RotatePlayer();
+        WalkSideways();        
         rb.velocity = transform.TransformDirection(velocity);
     }
 
     void GetInput()
     {
         forwardInput = Input.GetAxis(inputSetting.FORWARD_AXIS);
-        turnInput = Input.GetAxis(inputSetting.TURN_AXIS);
+        sidewaysInput = Input.GetAxis(inputSetting.TURN_SIDEWAYS);
         jumpInput = Input.GetAxisRaw(inputSetting.JUMP_AXIS); // (-1 ou 1)
-        
+        lockInput = Input.GetAxisRaw("Cancel");
+        mouseX = Input.GetAxis("Mouse X");
+        mouseY = Input.GetAxis("Mouse Y");        
     }
 
+    void CursorState()
+    {
+        if (lockInput > 0)
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
     bool CheckDelay (float input) {
         if (Mathf.Abs(input) > inputSetting.inputDelay)
         {
@@ -143,14 +155,68 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Turn ()
+    void WalkSideways ()
     {
-        if (CheckDelay(turnInput))
+        if (CheckDelay(sidewaysInput))
         {
-            targetRotation *= Quaternion.AngleAxis(moveSetting.rotateVel * turnInput * Time.deltaTime,
-                                                   Vector3.up);
-
+            //move
+            velocity.x = moveSetting.forwardVel * sidewaysInput;
         }
-        transform.rotation = targetRotation; 
+        else
+        {
+            velocity.x = 0;
+        }
+    }
+
+    void RotatePlayer()
+    {
+        RotateHorizontally();
+        RotateVertically();
+    }
+
+    void RotateHorizontally ()
+    {
+        float rotAmoutX = mouseX * moveSetting.mouseSensitivity;
+        Vector3 rotPlayer = transform.rotation.eulerAngles;
+        rotPlayer.y += rotAmoutX;
+        SmoothRotation(transform, Quaternion.Euler(rotPlayer));
+    }
+    Vector3 camVel = Vector3.zero;
+    void RotateVertically ()
+    {
+        float rotAmountY = mouseY * 0.15f;
+
+        Vector3 posPlayerArms = arms.transform.localPosition;
+        posPlayerArms.x = 0.05f; //0.40f;
+        posPlayerArms.z = 0.9f;
+        posPlayerArms.y += rotAmountY;
+        if (posPlayerArms.y < 0.02f)
+        {
+            posPlayerArms.y = 0.02f;
+        }
+        if (posPlayerArms.y > 2.8f)
+        {
+            posPlayerArms.y = 2.8f;
+        }
+        arms.transform.localPosition = Vector3.SmoothDamp(arms.transform.localPosition, posPlayerArms, ref camVel, 0.05f);
+/* 
+0.02 --  24
+2.80 -- -50
+1.39 -- -13
+1 -- x */
+
+        Vector3 rotPlayerArms = arms.transform.localRotation.eulerAngles;
+        rotPlayerArms.x = (74*(2.82f-posPlayerArms.y))/2.8f - 50;
+        rotPlayerArms.z = 0;
+        arms.transform.localRotation = Quaternion.Euler(rotPlayerArms);
+        cam.GetComponent<Camera>().GetComponent<CameraController>().orbit.xRotation = 360-arms.transform.rotation.eulerAngles.x;
+        Debug.Log(arms.transform.rotation.eulerAngles.x);
+        //cam.transform.rotation.eulerAngles.x = arms.transform.rotation.eulerAngles.x;
+    }
+
+    void SmoothRotation (Transform t, Quaternion next)
+    {
+        //Quaternion targetRotation = Quaternion.LookRotation(targetPos - transform.position);
+        t.rotation = Quaternion.Lerp(t.rotation, next, moveSetting.smoothRot * Time.deltaTime);
     }
 }
